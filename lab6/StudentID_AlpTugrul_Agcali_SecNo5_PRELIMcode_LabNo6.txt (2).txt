@@ -1,0 +1,254 @@
+CS224
+Lab No. 6
+Section No. 4
+Your Full Name Alp Tuğrul Ağçalı
+Bilkent ID 21801799
+Date 25.04.2022
+
+	.text		
+	.globl main
+main:
+	la $a0,  menu		# show menu
+	li $v0,4
+	syscall	
+	
+	li $v0, 5		# take answer
+	syscall
+	
+	move $s0, $v0
+	
+	beq $s0, 1, takematrix
+	beq $s0, 2, creatematrix
+	beq $s0, 3, findelement
+	beq $s0, 4, disp
+	beq $s0, 5, copymatrix
+	beq $s0, 6, done
+takematrix:
+	jal take
+	move $s6, $v1 		# s6 size
+	move $s7, $v0 	 	# s7 adress
+	j main	
+creatematrix:
+	jal create
+	move $s6, $v1 		# s6 size
+	move $s7, $v0 	 	# s7 adress
+	j main	
+findelement:
+	move $a0, $s7		# a0 adress
+	move $a1, $s6		# a1 size
+	jal find
+	j main
+disp:
+	move $a0, $s7		# a0 adress
+	move $a1, $s6		# a1 size
+	jal display
+	j main	
+copymatrix:	
+	move $a0, $s7		# a0 adress
+	move $a1, $s6		# a1 size
+	jal copy
+	move $s4, $v1 		# s3 size
+	move $s3, $v0 	 	# s4 adress
+	la $a0,  copiedmatrix		
+	li $v0,4
+	syscall	
+	move $a0, $s3		# a0 adress
+	move $a1, $s4		# a1 size
+	jal display
+	j main
+done: 	li $v0,10  
+	syscall		
+	
+	
+take:
+	la $a0,  asksize		# asksize
+	li $v0,4
+	syscall	
+	
+	li $v0, 5		# take answer
+	syscall
+	
+	move $v1, $v0  		# v1 is size of a matrix ( t0 x t0 )
+	
+	mult $v1, $v1
+	mflo $t1		# t1 is entry amount
+	
+	sll $t2, $t1, 2 	# t2 is size needed
+	
+	move $a0, $t2		# allocate place
+	li $v0, 9		
+	syscall
+	
+	move $t9, $v0		# t9 and t8 are start adress of array
+	move $t8, $t9
+	j loopcheck0
+	loop0:
+		la $a0,  asknumber		# ask number
+		li $v0,4
+		syscall	
+		
+		li $v0, 5		# take answer
+		syscall
+		
+		sw $v0, 0($t8)
+		
+		addi $t8, $t8, 4
+		addi $t1, $t1, -1	
+	
+	loopcheck0: bne $t1, $0, loop0
+	
+	move $v0, $t9
+	jr $ra
+
+create:	
+	la $a0,  asksize		# asksize
+	li $v0,4
+	syscall	
+	
+	li $v0, 5		# take answer
+	syscall
+	
+	move $v1, $v0  		# v1 is size of a matrix ( t0 x t0 )
+	
+	mult $v1, $v1
+	mflo $t1		# t1 is entry amount
+	
+	sll $t2, $t1, 2 	# t2 is size needed
+	
+	move $a0, $t2		# allocate place
+	li $v0, 9		
+	syscall
+	
+	move $t9, $v0		# t9 and t8 are start adress of array
+	move $t8, $t9
+	li $t3, 1
+	j loopcheck1
+	loop1:		
+		sw $t3, 0($t8)
+		
+		addi $t3, $t3, 1
+		addi $t8, $t8, 4
+		addi $t1, $t1, -1	
+	
+	loopcheck1: bne $t1, $0, loop1
+	
+	move $v0, $t9
+	jr $ra
+	
+find:
+	move $t8, $a1  		# t8 size
+	move $t9, $a0 		# t9 adress
+	
+	la $a0,  askrow		
+	li $v0,4
+	syscall	
+	
+	li $v0, 5		# take answer
+	syscall
+	
+	move $t0, $v0		# t0 is row
+	
+	la $a0,  askcolumn		
+	li $v0,4
+	syscall	
+	
+	li $v0, 5		# take answer
+	syscall
+	
+	move $t1, $v0		# t1 is column
+	
+	addi $t0, $t0, -1
+	sll $t0, $t0, 2
+	mul $t0, $t0, $t8
+	
+	addi $t1, $t1, -1
+	sll $t1, $t1, 2
+	add $t2, $t1, $t0
+	
+	add $t9, $t9, $t2
+	
+	lw $a0, 0($t9)
+	li $v0, 1
+	syscall
+	
+	la $a0,  endl		# endl
+	li $v0,4
+	syscall	
+	
+	jr $ra	
+
+display:
+	move $t8, $a1  		# t8 size
+	move $t9, $a0 		# t9 adress
+	
+	move $t7, $t8		# t7 size
+	move $t0, $t9		# t0 adress
+	
+	j loopcheck3
+	loop3:
+		move $t6, $t8  		# t8 size
+		j loopcheck4
+		loop4:
+			lw $a0, 0($t0)	
+			
+			li $v0, 1
+			syscall	
+			
+			la $a0,  space		# space
+			li $v0,4
+			syscall	
+							
+			addi $t0, $t0, 4
+			addi $t6, $t6, -1
+		loopcheck4: bne $t6, $0, loop4	
+		addi $t7, $t7, -1
+		la $a0,  endl		# endl
+		li $v0,4
+		syscall				
+	loopcheck3:bne $t7, $0, loop3				
+	
+	jr $ra
+
+copy:
+	move $t8, $a1  		# t8 size
+	move $t9, $a0 		# t9 adress
+	
+	mul $t0, $t8, $t8 	# t0 space needed
+	move $t5, $t0
+	sll $t0, $t0, 2			
+	
+	move $a0, $t0		# allocate place
+	li $v0, 9		
+	syscall
+	
+	move $t1, $v0		# t1 is adress of new array
+	move $t2, $t1
+	j loopcheck5
+	loop5:		
+		lw $t3, 0($t9)
+		sw $t3, 0($t2)
+		
+		addi $t9, $t9, 4
+		addi $t2, $t2, 4
+		addi $t5, $t5, -1
+	
+	loopcheck5: bne $t5, $0, loop5
+	
+	move $v0, $t1
+	move $v1, $t8
+	
+	jr $ra
+	
+	
+	
+	.data
+asksize: 		.asciiz "Please enter the row and column amount "
+askcolumn: 		.asciiz "Please enter the column "
+askrow:			.asciiz "Please enter the row "
+asknumber: 		.asciiz "Please enter the number "
+menu: 			.asciiz "1. Enter the matrix yourself \n2. Create a matrix automaticly \n3. Find desired element. \n4. Display entire matrix \n5. copy matrix\n6. end program\n"
+endl: 			.asciiz "\n"
+space: 			.asciiz "  "
+copiedmatrix:			.asciiz "copied matrix is \n"
+	
+

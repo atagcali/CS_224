@@ -1,0 +1,462 @@
+CS224
+Lab No 1
+Section No 2
+Your Full Name: Alp Tuğrul Ağçalı
+Bilkent ID: 21801799	
+Date 23.02.2022
+
+
+
+##
+## Program1.asm - prints out "hello world"
+##
+##	a0 - points to the string
+##
+
+#################################
+#					 	#
+#		text segment		#
+#						#
+#################################
+
+	.text		
+	.globl __start 
+
+__start:		# execution starts here
+	la $a0,str	# put string address into a0
+	li $v0,4	# system call to print
+	syscall		#   out a string
+
+	li $v0,10  # system call to exit
+	syscall	#    bye bye
+
+
+#################################
+#					 	#
+#     	 data segment		#
+#						#
+#################################
+
+	.data
+str:	.asciiz "hello Alper Mumcular!\n"
+n:	.word	10
+
+##
+## end of file Program1.asm
+
+----------------------------------------------------------------------
+
+
+##
+##	Program3.asm is a loop implementation
+##	of the Fibonacci function
+##        
+
+#################################
+#					 	#
+#		text segment		#
+#						#
+#################################
+
+	.text		
+	.globl __start
+ 
+__start:		# execution starts here
+	li $a0,0	# to calculate fib(7)
+	jal fib		# call fib 
+	move $a0,$v0	# print result
+	li $v0, 1
+	syscall		
+
+	la $a0, endl	# print newline 
+	li $v0,4
+	syscall
+
+	li $v0, 10
+	syscall		# bye bye
+
+#------------------------------------------------
+
+
+fib:	bne $a0, 1, pass
+	li $v0, 1
+pass:
+	blt $a0, 2, done	# fib(0)=0, fib(1)=1
+	
+	li $t0,0	# second last element
+	li $v0,1	# last element	
+
+loop:	add $t1,$t0,$v0	# get next value
+	move $t0,$v0	# update second last
+	move $v0,$t1	# update last element
+	sub $a0,$a0,1	# decrement count
+	bgt $a0,1,loop	# exit loop when count=0
+done:	jr $ra
+
+#################################
+#					 	#
+#     	 data segment		#
+#						#
+#################################
+
+	.data
+endl:	.asciiz "\n"
+
+##
+## end of Program3.asm
+------------------------------------------------------------------------------------
+
+4. Using MIPS for implementing a program with a simple menu that involve loop
+
+	.text		
+	.globl __start
+ 
+__start:
+	#la $s0, array		#s0 points to array
+	jal takeArray
+	move $s1, $v1		#s1 is size of array
+program:
+	li $s2, 0
+	la $a0, menu		#print the menu
+	li $v0, 4
+	syscall
+	
+	li $v0, 5		#take the answer
+	syscall
+	
+	add $s2, $s2, $v0
+	la $s0, array
+	beq $s2, 1, sum
+	beq $s2, 2, evenOdd
+	beq $s2, 3, divisible
+	beq $s2, 4, quit
+	
+sum:	
+	move $a3, $s0
+	jal summation
+	move $t0, $v0
+	la $a0, ans1		#print answer sentence
+	li $v0, 4
+	syscall
+	move $a0,$t0
+	li $v0, 1
+	syscall
+	la $a0, endl 		#End line
+	li $v0, 4
+	syscall
+	j done
+evenOdd:
+	move $a3, $s0
+	jal evenOrOdd
+	move $t0, $v1
+	move $t1, $v0
+	la $a0, ans2.0		#print answer sentence
+	li $v0, 4
+	syscall
+	move $a0,$t0
+	li $v0, 1
+	syscall
+	la $a0, ans2.1 		#print answer sentence
+	li $v0, 4
+	syscall
+	move $a0,$t1
+	li $v0, 1
+	syscall
+	la $a0, endl 		#End line
+	li $v0, 4
+	syscall
+	j done
+divisible:
+	move $a3, $s0 
+	jal checkDivisible
+	move $t0, $v0
+	la $a0, ans3		#print answer sentence
+	li $v0, 4
+	syscall
+	move $a0,$t0
+	li $v0, 1
+	syscall
+	la $a0, endl 		#End line
+	li $v0, 4
+	syscall
+	j done
+quit:	
+	li $v0, 10
+	syscall
+	j done
+done:  	j program		
+	
+	
+		
+				
+						
+								
+										
+												
+														
+																
+#----------------------------------------------------------------------------------------------------------------																		
+
+
+takeArray:	
+	la $a0, askSize		#Ask the size of array to the user
+	li $v0, 4	
+	syscall
+	
+	
+	li $v0, 5		#take the answer
+	syscall
+	
+	move $v1, $v0		#v1 = array's size 
+	addi $t1, $0, 1		#t1(i) = 1 
+	la $t0, array		#t0 = adrress of array	
+	j loopcheck1		#Jump to condition check
+	loop1:
+		la $a0, askNumbers 	#Ask new number every array loop
+		li $v0, 4
+		syscall
+		
+		li $v0, 5		#take numbers one by one	
+		syscall			
+		
+		sw $v0, 0($t0)
+		
+		addi $t0, $t0, 4									
+		addi $t1, $t1 1 	#i++
+	loopcheck1:	ble $t1, $v1, loop1 
+	jr $ra
+	
+summation:
+	la $a0, askvalue	#Ask new number every array loop	
+	li $v0, 4
+	syscall		
+	li $v0, 5		#take numbers one by one	
+	syscall	
+	
+	move $t0 ,$v0 		# i = 1
+	li $t1, 0 		# initialize sum = 0
+	j loopcheck2
+	loop2:
+		lw $t2, 0($a3)
+		add $t1, $t1, $t2
+		addi $t0, $t0, -1
+		addi $a3, $a3, 4 
+	loopcheck2: bge $t0, 1, loop2
+	move $v0, $t1
+	jr $ra	
+	
+evenOrOdd:
+	li $t0, 1 		# i = 1
+	li $t1, 0		# initialize of even = 0
+	li $t2, 0 		#initialize of odd = 0
+	j loopcheck3
+	loop3:
+		lw $t3, 0($a3)
+		li $t4, 2
+		div $t3, $t4
+		mfhi $t5
+		bne $t5, 0, else
+		addi $t2, $t2, 1
+		j endif
+		else:
+		addi $t1, $t1, 1
+		endif:
+		addi $t0, $t0, 1
+		addi $a3, $a3, 4 
+	loopcheck3:ble $t0, $s1, loop3
+	move $v0, $t1
+	move $v1, $t2
+	jr $ra
+
+checkDivisible:
+	li $t0, 1 		# i = 1
+	li $t1, 0		# initialize of not divisible = 0
+	
+	la $a0, divider
+	li $v0, 4
+	syscall
+	
+	li $v0, 5
+	syscall
+	move $t2, $v0
+	
+	j loopcheck4
+	loop4:
+		lw $t3, 0($a3)
+		div $t3, $t2
+		mfhi $t4
+		beq $t4, 0, pass
+		addi $t1, $t1, 1 	
+		pass:
+		addi $t0, $t0, 1
+		addi $a3, $a3, 4 
+	loopcheck4: ble $t0, $s1, loop4
+	move $v0, $t1
+	jr $ra	
+
+
+
+
+
+
+
+		.data
+array:		.space 	400
+askSize: 	.asciiz "Please enter the size of array. "
+askNumbers: 	.asciiz "please enter the number "
+comma:		.asciiz ", "
+endl:         	.asciiz "\n"
+menu:		.asciiz "Please enter, \n1 for find summation of numbers in the array. \n2 for find the numbers of even and odd numbers. \n3 for display the number of occurrences of the array elements NOT divisible by a certain input number. \n4 for quit \n"
+ans1:		.asciiz "Summation of the numbers in the array is "
+askvalue:	.asciiz "please enter a number "
+ans2.0:		.asciiz "Number of even numbers in the list is "
+ans2.1:		.asciiz ", number of odd numbers in the list is "
+divider:	.asciiz "please enter the divider"
+ans3:		.asciiz "Number of not dvisible elements is "
+
+
+
+-------------------------------------------------------------------------------------------------------------
+
+
+3.LAB FORMULA
+	.text		
+	.globl __start
+ 
+__start:
+	la $a0,askA		#ask a to user
+	li $v0,4		
+	syscall
+
+	li $v0, 5		
+	syscall
+	move $t0, $v0		#t0 = a.
+	
+	la $a0,askB		#ask b to user
+	li $v0,4		
+	syscall
+
+	li $v0, 5		
+	syscall
+	move $t1, $v0		#t1 = b.
+	
+	mult $t0, $t0 		
+	mflo $t2		#t2 = a^2
+	
+	mult $t0, $t1   	
+	mflo $t3 		#t3 = a * b
+	sll $t3, $t3, 1 	#t3 = 2(a * b)
+	
+	sub $t6, $t2, $t3 	#t6 = a^2 - 2(a * b)
+	
+	sub $t4, $t0, $t1    	#t4 = a - b
+	div $t4, $t1
+	mfhi $t5		#t5 = (a - b) % b
+
+	div $t6, $t5 		
+	mflo $s0 		#s0 = result 
+	mfhi $s1		#s1 = remainder
+	
+	la $a0, ans1		#print result
+	li $v0, 4
+	syscall
+	move $a0, $s0
+	li $v0, 1
+	syscall
+	
+	la $a0, endl
+	li $v0, 4
+	syscall
+	
+	la $a0, ans2		#print remainder
+	li $v0, 4
+	syscall
+	move $a0, $s1
+	li $v0, 1
+	syscall
+	
+	
+	li $v0 10
+	syscall
+	
+	
+	
+	
+	
+
+
+
+
+
+
+
+		.data
+askA:	.asciiz "Please enter the first number. "
+askB:	.asciiz "Please enter the second number. "
+ans1:	.asciiz "The result is "
+ans2:	.asciiz "The remainder is "
+endl:	.asciiz "\n"
+
+--------------------------------------------------------------------------------------
+
+##
+## Program2.asm asks user for temperature in Celsius,
+##  converts to Fahrenheit, prints the result.
+##
+##	v0 - reads in Celsius
+##	t0 - holds Fahrenheit result
+##	a0 - points to output strings
+##
+
+#################################
+#					 	#
+#		text segment		#
+#						#
+#################################
+
+	.text		
+	.globl __start	
+
+__start:
+	la $a0,prompt	# output prompt message on terminal
+	li $v0,4	# syscall 4 prints the string
+	syscall
+
+	li $v0, 5	# syscall 5 reads an integer
+	syscall
+
+	mul $t0,$v0,9	# to convert,multiply by 9,
+	div $t0,$t0,5	# divide by 5, then
+	add $t0,$t0,32	# add 32
+
+	la $a0,ans1	# print string before result
+	li $v0,4
+	syscall
+
+	move $a0,$t0	# print integer result
+	li $v0,1		# using syscall 1
+	syscall
+
+	la $a0,endl	# system call to print
+	li $v0,4		# out a newline
+	syscall
+
+	li $v0,10		# system call to exit
+	syscall		#    bye bye
+
+
+#################################
+#					 	#
+#     	 data segment		#
+#						#
+#################################
+
+	.data
+prompt:	.asciiz "Enter temperature (Celsius): "
+ans1:	.asciiz "The temperature in Fahrenheit is "
+endl:	.asciiz "\n"
+
+##
+## end of file Program2.asm
+
+

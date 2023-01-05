@@ -1,0 +1,223 @@
+CS224
+Lab No 3
+Section No 5
+Alp Tuğrul Ağçalı
+21801799
+13.03.2022
+	
+
+
+
+
+
+
+	.text		
+	.globl main
+
+main:
+	li $t0, 1
+	add $t3, $t0, $t0
+	la $a0, main
+	la $a1, end
+	lw $t5, 0($a0)
+	jal instructionCount	
+end:	
+	li $v0,10  
+	syscall	
+#----------------------------------------------------------
+
+
+instructionCount:		# a0 = adress of start of a function and a1 = end of a function
+	addi	$sp, $sp, -36
+	sw	$s0, 0($sp)
+	sw	$s1, 4($sp)
+	sw	$s2, 8($sp)
+	sw	$s3, 12($sp)
+	sw	$s4, 16($sp)
+	sw	$s5, 20($sp)
+	sw	$s6, 24($sp)
+	sw	$s7, 28($sp)
+	sw	$ra, 32($sp)
+	 
+	
+	j loopcheck
+	loop:
+		lw $s6, 0($a0)
+		srl $s7, $s6, 26
+		beq $s7, 0x23, loadword
+		beq $s7, 0xd, orimmediate
+		beq $s7, 0, Radd  
+		j done
+		loadword:
+			addi $s0, $s0, 1  
+			j done
+		orimmediate:
+			addi $s1, $s1, 1  
+			j done
+		Radd:
+			sll $s5, $s6, 26
+			srl, $s5, $s5, 26
+			bne $s5, 0x20, done
+			addi $s2, $s2, 1
+			done:
+		addi $a0, $a0, 4				 	 
+	loopcheck: blt $a0, $a1, loop
+	##print result
+	
+	la $a0,  resultlw
+	li $v0,4
+	syscall
+	
+	move $a0, $s0
+	li $v0, 1
+	syscall
+	
+	la $a0,  endl
+	li $v0,4
+	syscall
+	
+	la $a0,  resultori
+	li $v0,4
+	syscall
+	
+	move $a0, $s1
+	li $v0, 1
+	syscall
+	
+	la $a0,  endl
+	li $v0,4
+	syscall
+	
+	la $a0,  resultadd
+	li $v0,4
+	syscall
+	
+	move $a0, $s2
+	li $v0, 1
+	syscall
+	
+	lw	$s0, 0($sp)
+	lw	$s1, 4($sp)
+	lw	$s2, 8($sp)
+	lw	$s3, 12($sp)
+	lw	$s4, 16($sp)
+	lw	$s5, 20($sp)
+	lw	$s6, 24($sp)
+	lw	$s7, 28($sp)
+	lw	$ra, 32($sp)
+	addi	$sp, $sp, 36
+	
+	jr $ra
+	
+	
+#----------------------------------------------------------	
+		.data
+resultlw: 		.asciiz "The amount of 'lw' instruction is:  "
+resultori: 		.asciiz "The amount of 'ori' instruction is:  "
+resultadd: 		.asciiz "The amount of 'add' instruction is:  "
+endl: 			.asciiz "\n"
+
+
+
+
+#END OF FİRST PROGRAM----------------------------------------
+
+
+	.text		
+	.globl main
+
+main:
+	la $a0, ask1		# ask first number the menu
+	li $v0, 4
+	syscall
+	
+	li $v0, 5		# take the answer
+	syscall
+	
+	
+	move $s0, $v0
+	
+	la $a0, ask2		# ask second number the menu
+	li $v0, 4
+	syscall
+	
+	li $v0, 5		# take the answer
+	syscall
+	
+	move $a1, $v0
+	move $a0, $s0
+	li $v1, 0
+	li $v0, 0
+	
+	jal recursiveDivision	# divide
+		
+	addi $sp, $sp, -4
+	sw $v0, 0($sp)
+	
+	la $a0, result		# print result
+	li $v0, 4
+	syscall
+		
+	lw $v0, 0($sp)
+	addi $sp, $sp, 4
+		
+	move $a0, $v0
+	li $v0, 1
+	syscall 
+	
+	la $a0, endl		# end line
+	li $v0, 4
+	syscall
+	
+	la $a0, askCont		# ask if the user wants to continue
+	li $v0, 4
+	syscall
+	
+	li $v0, 5		# take the answer
+	syscall
+	move $s0, $v0		
+	
+	beq $s0, 0, end
+	j main		
+end:	
+	li $v0,10  
+	syscall	
+#----------------------------------------------------------
+
+
+recursiveDivision:		# a0/a1
+	bne $a0, 0, pass
+	li $v0, 0
+	j return
+	pass:
+	bgt $a0, $a1, pass2
+	addi $v1, $v1, 1
+	j return
+	pass2:
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+	sub $a0, $a0, $a1
+	jal recursiveDivision
+	
+	addi $sp, $sp, 4
+	lw $ra, 0($sp)
+	
+	addi $v1, $v1, 1
+	addi $v0, $v1, 1
+	j return
+	
+	return:
+
+	jr $ra
+	
+	
+#----------------------------------------------------------	
+		.data
+ask1:   	.asciiz "Please enter the first number "
+ask2:   	.asciiz "Please enter the second number "
+result:		.asciiz "Result of the division is: "
+askCont:	.asciiz "Do you want to continue? 0 = no, other = yes:  "
+endl: 		.asciiz "\n"
+
+
+

@@ -1,0 +1,291 @@
+CS224
+Lab 1
+Section 5
+Alp Tuğrul Ağçalı
+21801799
+21.02.2022
+
+
+
+#CreateArrayAndTwist
+
+	.text		
+	.globl __start
+ 
+__start:		# execution starts here
+	addi $s0, $0, 7
+	srl $s0, $s0, 1
+
+CreateArrayAndTwist:
+	la $a0, askSize		#Ask the size of array to the user
+	li $v0, 4	
+	syscall
+	
+	
+	li $v0, 5		#take the answer
+	syscall
+	
+	move $t0, $v0		#t0 = array's size 
+	addi $t1, $0, 1		#t1(i) = 1 
+	la $t2, array		#t2 = adrress of array
+	srl $t3, $t0, 1		#arraysize/2 for loops
+	sub $t7, $t0, $t3		
+	addi $t7, $t7, 1 	#mid+1 for changin place
+	j loopcheck1		#Jump to condition check
+	loop1:
+		la $a0, askNumbers 	#Ask new number every array loop
+		li $v0, 4
+		syscall
+		
+		li $v0, 5		#take numbers one by one	
+		syscall
+		
+		sw $v0, 0($t2)		
+		bne $t1, 1, pass1
+		addi $sp, $0, -4
+		sw $t2, 0($sp)	 	#storing start of array
+		pass1:
+		bne $t1, $t7, pass3
+		la $t4, 0($t2)		#store mid+1th element 
+		pass3:		
+		addi $t2, $t2, 4									
+		addi $t1, $t1 1 	#i++
+	loopcheck1:	ble $t1, $t0, loop1 
+	lw $t2, 0($sp)		#Set t2 as a first element of array
+	addi $t1, $0, 1		#t1(i) = 1 
+	la $a0, endl 		#End line
+	li $v0, 4
+	syscall
+	j loopcheck2
+	loop2:				#print elements
+		lw $a0, 0($t2)		
+		li $v0, 1		
+		syscall
+		beq $t1, $t0, pass2  	#add ", " if not last item
+		la $a0, comma
+		li $v0, 4
+		syscall
+		pass2:
+		addi $t2, $t2, 4
+		addi $t1, $t1 1 	#i++
+	loopcheck2:	ble $t1, $t0, loop2  
+	la $a0, endl 		#End line
+	li $v0, 4
+	syscall
+	lw $t2, 0($sp)		#Set t2 as a firs element of array
+	addi $t1, $0, 1		#t1(i) = 1 
+
+	j loopcheck3
+	loop3:				#change place
+		lw $t5, 0($t2)
+		lw $t6, 0($t4)
+		sw $t5, 0($t4)
+		sw $t6, 0($t2)
+		
+			
+		addi $t2, $t2, 4
+		addi $t4, $t4, 4
+		addi $t1, $t1 1 	#i++
+	loopcheck3: ble $t1, $t3, loop3 
+	
+	lw $t2, 0($sp)
+	addi $t1, $0, 1		#t1(i) = 1 
+	
+	j loopcheck4
+	loop4:				#print array
+		lw $a0, 0($t2)		
+		li $v0, 1		
+		syscall
+		beq $t1, $t0, pass4  	#add ", " 
+		la $a0, comma
+		li $v0, 4
+		syscall
+		pass4:
+		addi $t2, $t2, 4
+		addi $t1, $t1 1 	#i++
+	loopcheck4:	ble $t1, $t0, loop4  
+	
+	li $v0 10
+	syscall
+		
+	
+	
+		.data
+array:		.space 	80
+askSize: 	.asciiz "Please enter the size of array. "
+askNumbers: 	.asciiz "please enter the number "
+comma: 		.asciiz ", "
+endl:		.asciiz "\n"
+
+--------------------------------------------------------------------------------------------------
+#CheckIfBothHalfsIdentical
+
+	.text		
+	.globl __start
+ 
+__start:		# execution starts here
+	addi $s0, $0, 7
+	srl $s0, $s0, 1
+
+CheckIfBothHalfsIdentical:
+	la $a0, askSize		#Ask the size of array to the user
+	li $v0, 4	
+	syscall
+	
+	
+	li $v0, 5		#take the answer
+	syscall
+	
+	move $t0, $v0		#t0 = array's size 
+	addi $t1, $0, 1		#t1(i) = 1 
+	la $t2, array		#t2 = adrress of array
+	srl $t3, $t0, 1		#arraysize/2 for loops
+	sub $t7, $t0, $t3		
+	addi $t7, $t7, 1 	#mid+1 for changin place
+	j loopcheck1		#Jump to condition check
+	loop1:
+		la $a0, askNumbers 	#Ask new number every array loop
+		li $v0, 4
+		syscall
+		
+		li $v0, 5		#take numbers one by one	
+		syscall
+		
+		sw $v0, 0($t2)		
+		bne $t1, 1, pass1
+		addi $sp, $0, -4
+		sw $t2, 0($sp)	 	#storing start of array
+		pass1:
+		bne $t1, $t7, pass3
+		la $t4, 0($t2)		#store mid+1th element 
+		pass3:		
+		addi $t2, $t2, 4									
+		addi $t1, $t1 1 	#i++
+	loopcheck1:	ble $t1, $t0, loop1 
+	lw $t2, 0($sp)		#Set t2 as a first element of array
+	addi $t1, $0, 1		#t1(i) = 1 
+	la $a0, endl 		#End line
+	li $v0, 4
+	syscall
+	j loopcheck2
+	loop2:				#print elements
+		lw $a0, 0($t2)		
+		li $v0, 1		
+		syscall
+		beq $t1, $t0, pass2  	#add ", " if not last item
+		la $a0, comma
+		li $v0, 4
+		syscall
+		pass2:
+		addi $t2, $t2, 4
+		addi $t1, $t1 1 	#i++
+	loopcheck2:	ble $t1, $t0, loop2  
+	la $a0, endl 		#End line
+	li $v0, 4
+	syscall
+	lw $t2, 0($sp)		#Set t2 as a firs element of array
+	addi $t1, $0, 1		#t1(i) = 1 
+
+	j loopcheck3
+	loop3:				#change place
+		lw $t5, 0($t2)
+		lw $t6, 0($t4)
+		bne $t5, $t6, else	#if they are eq
+		la $t8, true		#true
+		j done
+		else:			#else
+		la $t8, false		#false
+		done:
+			
+		addi $t2, $t2, 4
+		addi $t4, $t4, 4
+		addi $t1, $t1 1 	#i++
+	loopcheck3: ble $t1, $t3, loop3 
+	
+	lw $t2, 0($sp)
+	addi $sp, $sp, 4
+	addi $t1, $0, 1		#t1(i) = 1 
+	move $a0, $t8  
+	li $v0, 4
+	syscall
+	
+	li $v0, 10
+	syscall	
+	
+		
+	
+	
+		.data
+array:		.space 	80
+askSize: 	.asciiz "Please enter the size of array. "
+askNumbers: 	.asciiz "please enter the number "
+comma: 		.asciiz ", "
+endl:		.asciiz "\n"
+true: 		.asciiz "true"
+false:		.asciiz "false"
+
+
+-----------------------------------------------------------------------------------------------------------
+#ArithmeticExpression
+
+
+	.text		
+	.globl __start	
+
+__start:
+	#t0 = x,  t1 =a, t2 = b, t3 = c
+	la $a0, enterA
+	li $v0, 4
+	syscall
+	li $v0, 5
+	syscall
+	move $t1, $v0
+	
+	la $a0, enterB
+	li $v0, 4
+	syscall
+	li $v0, 5
+	syscall
+	move $t2, $v0
+	
+	la $a0, enterC
+	li $v0, 4
+	syscall
+	li $v0, 5
+	syscall
+	move $t3, $v0
+
+	ArithmeticExpression: #t0 = x,  t1 =a, t2 = b, t3 = c
+	
+	sub $t4, $t2, $t3
+	mult $t1, $t4
+	mfhi $t6
+	mflo $t5
+	srl $t0, $t5, 4
+	
+	
+	move $a0, $t0
+	li $v0, 1 
+	syscall
+	
+	
+	
+	
+	
+	
+	
+	
+	
+		.data
+enterA:		.asciiz "Please enter a. "
+enterB:		.asciiz "Please enter b. "
+enterC :	.asciiz "Please enter c. "		
+
+
+
+
+
+
+
+
+
